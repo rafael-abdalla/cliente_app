@@ -55,7 +55,10 @@ class _SplashContentState extends State<SplashContent> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(backgroundColor: Colors.white),
+                      CircularProgressIndicator(
+                        valueColor:
+                            new AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
                       SizedBox(height: 10),
                       Text(
                         'Carregando...',

@@ -2,10 +2,14 @@ import 'package:cliente/app/controllers/cadastro_controller.dart';
 import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/shared/components/cliente_button.dart';
 import 'package:cliente/app/shared/components/cliente_input.dart';
+import 'package:cliente/app/shared/mixins/loader_mixin.dart';
+import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
+import 'package:cliente/app/views/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class CadastrarUsuarioPage extends StatelessWidget {
   static const router = '/CadastrarUsuario';
@@ -25,7 +29,8 @@ class CadastrarUsuarioContent extends StatefulWidget {
       _CadastrarUsuarioContentState();
 }
 
-class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent> {
+class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
+    with LoaderMixin, MensagensMixin {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController sobrenomeController = TextEditingController();
@@ -37,6 +42,18 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent> {
   void initState() {
     super.initState();
     final controller = context.read<CadastroController>();
+    controller.addListener(() async {
+      if (this.mounted) {
+        exibirLoaderHelper(context, controller.carregando);
+
+        if (!isNull(controller.error))
+          exibirErro(context: context, message: controller.error);
+
+        if (controller.cadastroSuccess) {
+          Navigator.of(context).pushReplacementNamed(HomePage.router);
+        }
+      }
+    });
   }
 
   @override
@@ -155,7 +172,7 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent> {
 
   void _salvarCliente(BuildContext context) {
     if (_formKey.currentState.validate()) {
-      context.read<CadastroController>().cadastrarUsuario(
+      context.read<CadastroController>().cadastrarCliente(
             new ClienteModel(
               nome: nomeController.text,
               sobrenome: sobrenomeController.text,
