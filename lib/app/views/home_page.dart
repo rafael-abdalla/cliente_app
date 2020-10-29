@@ -1,5 +1,5 @@
 import 'package:cliente/app/models/cliente_model.dart';
-import 'package:cliente/app/views/cadastrar_usuario_parge.dart';
+import 'package:cliente/app/views/cadastro_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 

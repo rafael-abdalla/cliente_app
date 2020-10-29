@@ -1,4 +1,4 @@
-import 'package:cliente/app/views/cadastrar_usuario_parge.dart';
+import 'package:cliente/app/views/cadastro_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app/views/home_page.dart';
