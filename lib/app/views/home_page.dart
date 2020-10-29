@@ -137,6 +137,7 @@ class HomeContent extends StatelessWidget {
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width,
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Container(
                             width: MediaQuery.of(context).size.width * 0.1,
@@ -145,45 +146,36 @@ class HomeContent extends StatelessWidget {
                               backgroundColor: Colors.blue,
                             ),
                           ),
-                          SizedBox(width: 10),
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.73,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(clienteObj.nome),
-                                    Text(
-                                      'Aparecida D´Oeste, SP',
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(clienteObj.nome),
+                              Text(
+                                'Aparecida D´Oeste, SP',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
                                 ),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      color: Colors.grey[600],
-                                      icon: Icon(FontAwesome.pencil),
-                                      onPressed: () {},
-                                    ),
-                                    Container(
-                                      height: 30,
-                                      width: 0.3,
-                                      color: Colors.grey,
-                                    ),
-                                    IconButton(
-                                      color: Colors.red,
-                                      icon: Icon(FontAwesome.trash),
-                                      onPressed: () {},
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                color: Colors.grey[600],
+                                icon: Icon(FontAwesome.pencil),
+                                onPressed: () {},
+                              ),
+                              Container(
+                                height: 30,
+                                width: 0.3,
+                                color: Colors.grey,
+                              ),
+                              IconButton(
+                                color: Colors.red,
+                                icon: Icon(FontAwesome.trash),
+                                onPressed: () {},
+                              ),
+                            ],
                           ),
                         ],
                       ),

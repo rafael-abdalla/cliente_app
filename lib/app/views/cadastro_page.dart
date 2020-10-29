@@ -5,6 +5,7 @@ import 'package:cliente/app/shared/components/cliente_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:validators/validators.dart';
 
 class CadastrarUsuarioPage extends StatelessWidget {
   static const router = '/CadastrarUsuario';
@@ -73,29 +74,62 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent> {
                   SizedBox(height: 40),
                   Form(
                     key: _formKey,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     child: Column(
                       children: [
                         ClienteInput(
                           "Nome",
                           controller: nomeController,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty)
+                              return 'Nome obrigatório';
+
+                            return null;
+                          },
                         ),
                         ClienteInput(
                           "Sobrenome",
                           controller: sobrenomeController,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty)
+                              return 'Sobrenome obrigatório';
+
+                            return null;
+                          },
                         ),
                         ClienteInput(
                           "Email",
+                          keyboardType: TextInputType.emailAddress,
                           controller: emailController,
+                          validator: (value) {
+                            if (!isEmail(value?.toString() ?? ''))
+                              return 'E-mail inválido';
+
+                            return null;
+                          },
                         ),
                         ClienteInput(
                           "Telefone",
+                          keyboardType: TextInputType.phone,
                           controller: telefoneController,
                           helperText: "Digite apenas números",
+                          validator: (value) {
+                            if (!isNumeric(value)) return 'Telefone inválido';
+
+                            return null;
+                          },
                         ),
                         ClienteInput(
                           "Cep",
+                          keyboardType: TextInputType.phone,
                           controller: cepController,
                           helperText: "Digite apenas números",
+                          validator: (value) {
+                            if (!(isNumeric(value) && (value?.length == 8)))
+                              return 'Cep inválido';
+
+                            return null;
+                          },
                         ),
                         SizedBox(height: 20),
                         ClienteButton(
