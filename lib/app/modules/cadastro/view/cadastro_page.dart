@@ -53,10 +53,18 @@ class _CadastroContentState extends State<CadastroContent>
           exibirErro(context: context, message: controller.erro);
         }
 
-        if (controller.cadastroSucesso || controller.edicaoSucesso) {
-          String mensagem = controller.cadastroSucesso
-              ? 'Cliente salvo com sucesso'
-              : 'Alteração salva com sucesso';
+        if (controller.cadastroSucesso ||
+            controller.edicaoSucesso ||
+            controller.inativarSucesso) {
+          String mensagem = "";
+
+          if (controller.cadastroSucesso)
+            mensagem = "Cliente salvo com sucesso";
+          if (controller.edicaoSucesso)
+            mensagem = "Alteração salva com sucesso";
+          if (controller.inativarSucesso)
+            mensagem = "Cliente excluído com sucesso";
+
           exibirSucesso(message: mensagem, context: context);
           Future.delayed(
               Duration(seconds: 1),
@@ -210,16 +218,18 @@ class _CadastroContentState extends State<CadastroContent>
   }
 
   void _editarCadastro(BuildContext context) {
+    var controller = context.read<ClienteController>();
     if (_formKey.currentState.validate()) {
-      context.read<ClienteController>().editarCadastro(
-            ClienteModel(
-              nome: nomeController.text,
-              sobrenome: sobrenomeController.text,
-              email: emailController.text,
-              telefone: int.parse(telefoneController.text),
-              cep: int.parse(cepController.text),
-            ),
-          );
+      controller.editarCadastro(
+        ClienteModel(
+          codigo: controller.cliente.codigo,
+          nome: nomeController.text,
+          sobrenome: sobrenomeController.text,
+          email: emailController.text,
+          telefone: int.parse(telefoneController.text),
+          cep: int.parse(cepController.text),
+        ),
+      );
     }
   }
 }

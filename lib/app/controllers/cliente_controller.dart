@@ -9,6 +9,7 @@ class ClienteController extends ChangeNotifier {
   bool _carregando = false;
   bool _cadastroSucesso = false;
   bool _edicaoSucesso = false;
+  bool _inativarSucesso = false;
   String _erro = '';
   final _repository = ClienteRepository();
 
@@ -16,6 +17,7 @@ class ClienteController extends ChangeNotifier {
   bool get carregando => _carregando;
   bool get cadastroSucesso => _cadastroSucesso;
   bool get edicaoSucesso => _edicaoSucesso;
+  bool get inativarSucesso => _inativarSucesso;
   String get erro => _erro;
   bool get editando => (_cliente.codigo != null);
 
@@ -37,6 +39,11 @@ class ClienteController extends ChangeNotifier {
     }
   }
 
+  void selecionarCliente(ClienteModel clienteObj) {
+    _cliente = clienteObj;
+    notifyListeners();
+  }
+
   Stream<List<ClienteModel>> listarClientes() {
     return _repository.listarClientes();
   }
@@ -45,6 +52,7 @@ class ClienteController extends ChangeNotifier {
     _carregando = false;
     _cadastroSucesso = false;
     _edicaoSucesso = false;
+    _inativarSucesso = false;
     _erro = '';
     _cliente = ClienteModel();
     notifyListeners();
@@ -55,12 +63,30 @@ class ClienteController extends ChangeNotifier {
     _edicaoSucesso = false;
     notifyListeners();
     try {
-      await _repository.editarCadastro(_cliente);
+      await _repository.editarCadastro(clienteObj);
       _carregando = false;
       _edicaoSucesso = true;
     } on FirestoreException catch (e) {
       _carregando = false;
       _edicaoSucesso = false;
+      _erro = e.message;
+    } finally {
+      _carregando = false;
+      notifyListeners();
+    }
+  }
+
+  void inativarCadastro(String codigo) async {
+    _carregando = true;
+    _inativarSucesso = false;
+    notifyListeners();
+    try {
+      await _repository.inativarCadastro(codigo);
+      _carregando = false;
+      _inativarSucesso = true;
+    } on FirestoreException catch (e) {
+      _carregando = false;
+      _inativarSucesso = false;
       _erro = e.message;
     } finally {
       _carregando = false;

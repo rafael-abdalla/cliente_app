@@ -7,7 +7,7 @@ class FeedbackRepository {
 
   Future<void> enviarFeedback(String feedback) async {
     try {
-      _feedbackCollection.add({
+      await _feedbackCollection.add({
         'texto': feedback,
         'dataEnvio': Timestamp.now().microsecondsSinceEpoch
       });

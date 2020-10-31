@@ -43,4 +43,13 @@ class ClienteRepository {
       throw FirestoreException('Falha ao editar os dados!');
     }
   }
+
+  Future<void> inativarCadastro(String codigo) async {
+    try {
+      await _clientesCollection.doc(codigo).update({'ativo': false});
+    } catch (e) {
+      print(e);
+      throw FirestoreException('Falha ao inativar cliente!');
+    }
+  }
 }

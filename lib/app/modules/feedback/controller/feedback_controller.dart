@@ -13,6 +13,9 @@ class FeedbackController extends ChangeNotifier {
   String get erro => _erro;
 
   Future<void> enviarFeedback(String texto) async {
+    _carregando = true;
+    _envioSucesso = false;
+    notifyListeners();
     try {
       await _repository.enviarFeedback(texto);
       _carregando = false;

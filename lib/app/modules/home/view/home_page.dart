@@ -3,16 +3,21 @@ import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/models/controls/opcao_model.dart';
 import 'package:cliente/app/modules/cadastro/view/cadastro_page.dart';
 import 'package:cliente/app/modules/feedback/view/feedback_page.dart';
+import 'package:cliente/app/shared/mixins/loader_mixin.dart';
+import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:validators/validators.dart';
 
 class HomePage extends StatelessWidget {
   static const router = '/Home';
 
   @override
   Widget build(BuildContext context) {
-    return HomeContent();
+    return Scaffold(
+      body: HomeContent(),
+    );
   }
 }
 
@@ -21,13 +26,28 @@ class HomeContent extends StatefulWidget {
   _HomeContentState createState() => _HomeContentState();
 }
 
-class _HomeContentState extends State<HomeContent> {
+class _HomeContentState extends State<HomeContent>
+    with LoaderMixin, MensagensMixin {
   ClienteController controller;
 
   @override
   void initState() {
     super.initState();
     controller = context.read<ClienteController>();
+    controller.addListener(() async {
+      if (this.mounted) {
+        exibirLoaderHelper(context, controller.carregando);
+
+        if (!isNull(controller.erro)) {
+          exibirErro(context: context, message: controller.erro);
+        }
+
+        if (controller.inativarSucesso) {
+          exibirSucesso(
+              message: "Cliente excluído com sucesso", context: context);
+        }
+      }
+    });
   }
 
   List<OpcaoModel> opcoes = [
@@ -179,7 +199,7 @@ class _HomeContentState extends State<HomeContent> {
                 IconButton(
                   color: Colors.red,
                   icon: Icon(FontAwesome.trash),
-                  onPressed: () => _excluirCadastro(clienteObj),
+                  onPressed: () => _inativarCadastro(clienteObj),
                 ),
               ],
             ),
@@ -201,9 +221,11 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _editarCadastro(ClienteModel clienteObj) {
-    controller?.editarCadastro(clienteObj);
+    controller?.selecionarCliente(clienteObj);
     Navigator.of(context).pushNamed(CadastroPage.router);
   }
 
-  void _excluirCadastro(ClienteModel clienteObj) {}
+  void _inativarCadastro(ClienteModel clienteObj) {
+    controller?.inativarCadastro(clienteObj.codigo);
+  }
 }

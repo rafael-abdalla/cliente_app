@@ -82,6 +82,7 @@ class _FeedbackContentState extends State<FeedbackContent>
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: ClienteInput(
                     controller: _textoController,
+                    hintText: 'Descreva suas impressões',
                     maxLength: 110,
                     lines: 6,
                     validator: (value) {

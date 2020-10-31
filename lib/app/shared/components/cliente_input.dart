@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 class ClienteInput extends TextFormField {
   ClienteInput({
     String label,
+    String hintText,
     String helperText,
     TextEditingController controller,
     TextInputType keyboardType,
@@ -20,7 +21,7 @@ class ClienteInput extends TextFormField {
           maxLength: maxLength,
           decoration: InputDecoration(
             labelText: label,
-            hintText: 'Descreva suas impressões',
+            hintText: hintText,
             helperText: helperText,
           ),
         );
