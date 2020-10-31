@@ -1,4 +1,5 @@
-import 'package:cliente/app/controllers/cliente_controller.dart';
+import 'package:cliente/app/modules/ajuda/view/ajuda_page.dart';
+import 'package:cliente/app/modules/home/controller/home_controller.dart';
 import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/models/controls/opcao_model.dart';
 import 'package:cliente/app/modules/cadastro/view/cadastro_page.dart';
@@ -15,8 +16,11 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: HomeContent(),
+    return ChangeNotifierProvider(
+      create: (context) => HomeController(),
+      child: Scaffold(
+        body: HomeContent(),
+      ),
     );
   }
 }
@@ -28,12 +32,12 @@ class HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<HomeContent>
     with LoaderMixin, MensagensMixin {
-  ClienteController controller;
+  HomeController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = context.read<ClienteController>();
+    controller = context.read<HomeController>();
     controller.addListener(() async {
       if (this.mounted) {
         exibirLoaderHelper(context, controller.carregando);
@@ -91,56 +95,53 @@ class _HomeContentState extends State<HomeContent>
           SizedBox(width: 5),
         ],
       ),
-      body: ChangeNotifierProvider(
-        create: (context) => ClienteController(),
-        child: StreamBuilder(
-          stream: controller?.listarClientes(),
-          builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-            if (snapshot.hasError) {
-              print(snapshot.error);
-              return Center(
-                child: Text(
-                  ':(\nNão foi possível carregar os dados\nTente mais tarde',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18),
-                ),
-              );
-            } else {
-              List<ClienteModel> clientes = snapshot.data;
+      body: StreamBuilder(
+        stream: controller?.listarClientes(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.hasError) {
+            print(snapshot.error);
+            return Center(
+              child: Text(
+                ':(\nNão foi possível carregar os dados\nTente mais tarde',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18),
+              ),
+            );
+          } else {
+            List<ClienteModel> clientes = snapshot.data;
 
-              switch (snapshot.connectionState) {
-                case ConnectionState.active:
-                  return SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        children: [
-                          SizedBox(height: 10),
-                          ListView.builder(
-                            itemCount: clientes.length,
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) {
-                              return _buildContainer(context, clientes[index]);
-                            },
-                          ),
-                        ],
-                      ),
+            switch (snapshot.connectionState) {
+              case ConnectionState.active:
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        ListView.builder(
+                          itemCount: clientes.length,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return _buildContainer(context, clientes[index]);
+                          },
+                        ),
+                      ],
                     ),
-                  );
-                  break;
-                default:
-                  return Center(
-                    child: CircularProgressIndicator(
-                      valueColor: new AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).primaryColor),
-                    ),
-                  );
-                  break;
-              }
+                  ),
+                );
+                break;
+              default:
+                return Center(
+                  child: CircularProgressIndicator(
+                    valueColor: new AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).primaryColor),
+                  ),
+                );
+                break;
             }
-          },
-        ),
+          }
+        },
       ),
     );
   }
@@ -148,7 +149,6 @@ class _HomeContentState extends State<HomeContent>
   Widget _buildContainer(BuildContext context, ClienteModel clienteObj) {
     return Container(
       margin: const EdgeInsets.only(top: 15),
-      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(2),
         boxShadow: [
@@ -162,46 +162,69 @@ class _HomeContentState extends State<HomeContent>
       ),
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: Column(
           children: [
-            Container(
-              width: MediaQuery.of(context).size.width * 0.1,
-              child: CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.blue,
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.1,
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Colors.blue,
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(clienteObj.nome),
+                      Text(
+                        'Aparecida D´Oeste, SP',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        color: Colors.grey[600],
+                        icon: Icon(FontAwesome.pencil),
+                        onPressed: () => _editarCadastro(clienteObj),
+                      ),
+                      Container(
+                        height: 30,
+                        width: 0.3,
+                        color: Colors.grey,
+                      ),
+                      IconButton(
+                        color: Colors.red,
+                        icon: Icon(FontAwesome.trash),
+                        onPressed: () => _inativarCadastro(clienteObj),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(clienteObj.nome),
-                Text(
-                  'Aparecida D´Oeste, SP',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
+            Container(
+              height: 0.5,
+              color: Colors.grey[300],
             ),
-            Row(
-              children: [
-                IconButton(
-                  color: Colors.grey[600],
-                  icon: Icon(FontAwesome.pencil),
-                  onPressed: () => _editarCadastro(clienteObj),
+            GestureDetector(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Detalhes',
+                  style: TextStyle(color: Colors.blue),
                 ),
-                Container(
-                  height: 30,
-                  width: 0.3,
-                  color: Colors.grey,
-                ),
-                IconButton(
-                  color: Colors.red,
-                  icon: Icon(FontAwesome.trash),
-                  onPressed: () => _inativarCadastro(clienteObj),
-                ),
-              ],
+              ),
+              onTap: () {
+                print('abrir dialog contendo todas as informações do cliente');
+              },
             ),
           ],
         ),
@@ -215,14 +238,16 @@ class _HomeContentState extends State<HomeContent>
         Navigator.of(context).pushNamed(FeedbackPage.router);
         break;
       case "Ajuda":
-        print('página com informações');
+        Navigator.of(context).pushNamed(AjudaPage.router);
         break;
     }
   }
 
   void _editarCadastro(ClienteModel clienteObj) {
-    controller?.selecionarCliente(clienteObj);
-    Navigator.of(context).pushNamed(CadastroPage.router);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CadastroPage(clienteObj)),
+    );
   }
 
   void _inativarCadastro(ClienteModel clienteObj) {

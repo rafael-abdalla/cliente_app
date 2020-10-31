@@ -1,5 +1,5 @@
-import 'package:cliente/app/controllers/cliente_controller.dart';
 import 'package:cliente/app/models/cliente_model.dart';
+import 'package:cliente/app/modules/cadastro/controller/cadastro_controller.dart';
 import 'package:cliente/app/shared/components/cliente_button.dart';
 import 'package:cliente/app/shared/components/cliente_input.dart';
 import 'package:cliente/app/shared/mixins/loader_mixin.dart';
@@ -13,15 +13,26 @@ import 'package:validators/validators.dart';
 class CadastroPage extends StatelessWidget {
   static const router = '/Cadastro';
 
+  final ClienteModel cliente;
+
+  const CadastroPage(this.cliente, {Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CadastroContent(),
+    return ChangeNotifierProvider(
+      create: (context) => CadastroController(),
+      child: Scaffold(
+        body: CadastroContent(cliente),
+      ),
     );
   }
 }
 
 class CadastroContent extends StatefulWidget {
+  final ClienteModel cliente;
+
+  const CadastroContent(this.cliente, {Key key}) : super(key: key);
+
   @override
   _CadastroContentState createState() => _CadastroContentState();
 }
@@ -38,12 +49,12 @@ class _CadastroContentState extends State<CadastroContent>
   @override
   void initState() {
     super.initState();
-    final controller = context.read<ClienteController>();
-    nomeController.text = controller.cliente.nome ?? '';
-    sobrenomeController.text = controller.cliente.sobrenome ?? '';
-    emailController.text = controller.cliente.email ?? '';
-    telefoneController.text = controller.cliente.telefone?.toString() ?? '';
-    cepController.text = controller.cliente.cep?.toString() ?? '';
+    final controller = context.read<CadastroController>();
+    nomeController.text = widget.cliente.nome ?? '';
+    sobrenomeController.text = widget.cliente.sobrenome ?? '';
+    emailController.text = widget.cliente.email ?? '';
+    telefoneController.text = widget.cliente.telefone?.toString() ?? '';
+    cepController.text = widget.cliente.cep?.toString() ?? '';
 
     controller.addListener(() async {
       if (this.mounted) {
@@ -67,23 +78,12 @@ class _CadastroContentState extends State<CadastroContent>
 
           exibirSucesso(message: mensagem, context: context);
           Future.delayed(
-              Duration(seconds: 1),
-              () =>
-                  Navigator.of(context).pushReplacementNamed(HomePage.router));
+            Duration(seconds: 1),
+            () => Navigator.of(context).pushReplacementNamed(HomePage.router),
+          );
         }
       }
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    context.read<ClienteController>().limparDadosCliente();
-    nomeController.dispose();
-    sobrenomeController.dispose();
-    emailController.dispose();
-    telefoneController.dispose();
-    cepController.dispose();
   }
 
   @override
@@ -145,7 +145,7 @@ class _CadastroContentState extends State<CadastroContent>
                           },
                         ),
                         ClienteInput(
-                          label: "Email",
+                          label: "E-mail",
                           keyboardType: TextInputType.emailAddress,
                           controller: emailController,
                           validator: (value) {
@@ -186,10 +186,7 @@ class _CadastroContentState extends State<CadastroContent>
                           buttonColor: Theme.of(context).primaryColor,
                           textColor: Colors.white,
                           textStyle: TextStyle(fontSize: 16),
-                          onPressed: () =>
-                              context.read<ClienteController>().editando
-                                  ? _editarCadastro(context)
-                                  : _salvarCliente(context),
+                          onPressed: () => _enviarCadastro(context),
                         ),
                       ],
                     ),
@@ -203,10 +200,11 @@ class _CadastroContentState extends State<CadastroContent>
     );
   }
 
-  void _salvarCliente(BuildContext context) {
+  void _enviarCadastro(BuildContext context) {
     if (_formKey.currentState.validate()) {
-      context.read<ClienteController>().cadastrarCliente(
+      context.read<CadastroController>().enviarCadastro(
             ClienteModel(
+              codigo: widget.cliente.codigo,
               nome: nomeController.text,
               sobrenome: sobrenomeController.text,
               email: emailController.text,
@@ -214,22 +212,6 @@ class _CadastroContentState extends State<CadastroContent>
               cep: int.parse(cepController.text),
             ),
           );
-    }
-  }
-
-  void _editarCadastro(BuildContext context) {
-    var controller = context.read<ClienteController>();
-    if (_formKey.currentState.validate()) {
-      controller.editarCadastro(
-        ClienteModel(
-          codigo: controller.cliente.codigo,
-          nome: nomeController.text,
-          sobrenome: sobrenomeController.text,
-          email: emailController.text,
-          telefone: int.parse(telefoneController.text),
-          cep: int.parse(cepController.text),
-        ),
-      );
     }
   }
 }

@@ -3,9 +3,7 @@ import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/repositories/cliente_repository.dart';
 import 'package:flutter/material.dart';
 
-class ClienteController extends ChangeNotifier {
-  ClienteModel _cliente = ClienteModel();
-
+class CadastroController extends ChangeNotifier {
   bool _carregando = false;
   bool _cadastroSucesso = false;
   bool _edicaoSucesso = false;
@@ -13,20 +11,25 @@ class ClienteController extends ChangeNotifier {
   String _erro = '';
   final _repository = ClienteRepository();
 
-  ClienteModel get cliente => _cliente;
   bool get carregando => _carregando;
   bool get cadastroSucesso => _cadastroSucesso;
   bool get edicaoSucesso => _edicaoSucesso;
   bool get inativarSucesso => _inativarSucesso;
   String get erro => _erro;
-  bool get editando => (_cliente.codigo != null);
 
-  Future<void> cadastrarCliente(ClienteModel clienteObj) async {
+  void enviarCadastro(ClienteModel clienteObj) {
+    if (clienteObj.codigo == null)
+      novoCadastro(clienteObj);
+    else
+      editarCadastro(clienteObj);
+  }
+
+  Future<void> novoCadastro(ClienteModel clienteObj) async {
     _carregando = true;
     _cadastroSucesso = false;
     notifyListeners();
     try {
-      await _repository.cadastrarCliente(clienteObj);
+      await _repository.novoCadastro(clienteObj);
       _carregando = false;
       _cadastroSucesso = true;
     } on FirestoreException catch (e) {
@@ -39,26 +42,7 @@ class ClienteController extends ChangeNotifier {
     }
   }
 
-  void selecionarCliente(ClienteModel clienteObj) {
-    _cliente = clienteObj;
-    notifyListeners();
-  }
-
-  Stream<List<ClienteModel>> listarClientes() {
-    return _repository.listarClientes();
-  }
-
-  void limparDadosCliente() {
-    _carregando = false;
-    _cadastroSucesso = false;
-    _edicaoSucesso = false;
-    _inativarSucesso = false;
-    _erro = '';
-    _cliente = ClienteModel();
-    notifyListeners();
-  }
-
-  void editarCadastro(ClienteModel clienteObj) async {
+  Future<void> editarCadastro(ClienteModel clienteObj) async {
     _carregando = true;
     _edicaoSucesso = false;
     notifyListeners();
@@ -69,24 +53,6 @@ class ClienteController extends ChangeNotifier {
     } on FirestoreException catch (e) {
       _carregando = false;
       _edicaoSucesso = false;
-      _erro = e.message;
-    } finally {
-      _carregando = false;
-      notifyListeners();
-    }
-  }
-
-  void inativarCadastro(String codigo) async {
-    _carregando = true;
-    _inativarSucesso = false;
-    notifyListeners();
-    try {
-      await _repository.inativarCadastro(codigo);
-      _carregando = false;
-      _inativarSucesso = true;
-    } on FirestoreException catch (e) {
-      _carregando = false;
-      _inativarSucesso = false;
       _erro = e.message;
     } finally {
       _carregando = false;

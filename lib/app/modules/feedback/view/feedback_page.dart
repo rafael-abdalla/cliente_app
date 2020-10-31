@@ -54,8 +54,12 @@ class _FeedbackContentState extends State<FeedbackContent>
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(FontAwesome.arrow_left),
+          icon: Icon(
+            FontAwesome.arrow_left,
+            color: Theme.of(context).primaryColor,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -70,10 +74,17 @@ class _FeedbackContentState extends State<FeedbackContent>
               children: [
                 SizedBox(height: 10),
                 Text(
-                  'Olá\nAjude a melhorar o aplicativo, envie uma breve avaliação',
+                  'Feedback',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Ajude a melhorar o aplicativo enviando uma breve avaliação.',
+                  style: TextStyle(
+                    fontSize: 16,
                   ),
                 ),
                 SizedBox(height: 40),

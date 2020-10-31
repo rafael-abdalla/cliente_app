@@ -6,7 +6,7 @@ class ClienteRepository {
   final CollectionReference _clientesCollection =
       FirebaseFirestore.instance.collection('clientes');
 
-  Future<void> cadastrarCliente(ClienteModel clienteModel) async {
+  Future<void> novoCadastro(ClienteModel clienteModel) async {
     try {
       await _clientesCollection.add(clienteModel.toMap());
     } on Exception catch (e) {
