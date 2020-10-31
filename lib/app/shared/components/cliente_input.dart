@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class ClienteInput extends TextFormField {
-  ClienteInput(
-    label, {
+  ClienteInput({
+    String label,
     String helperText,
     TextEditingController controller,
     TextInputType keyboardType,
     FormFieldValidator validator,
+    int maxLength,
+    int lines,
     Icon suffixIcon,
-    obscureText = false,
   }) : super(
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
+          minLines: lines ?? 1,
+          maxLines: lines ?? 1,
+          maxLength: maxLength,
           decoration: InputDecoration(
             labelText: label,
+            hintText: 'Descreva suas impressões',
             helperText: helperText,
           ),
         );

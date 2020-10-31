@@ -25,12 +25,8 @@ abstract class LoaderMixin {
             builder: (_) {
               return Container(
                 width: 20,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    Text('Carregando...'),
-                  ],
+                child: Center(
+                  child: CircularProgressIndicator(),
                 ),
               );
             },

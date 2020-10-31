@@ -8,7 +8,7 @@ class ClienteRepository {
 
   Future<void> cadastrarCliente(ClienteModel clienteModel) async {
     try {
-      _clientesCollection.add(clienteModel.toMap());
+      await _clientesCollection.add(clienteModel.toMap());
     } on Exception catch (e) {
       print(e);
       throw FirestoreException('Falha ao salvar os dados!');
@@ -23,13 +23,24 @@ class ClienteRepository {
       return stream.map(
         (QuerySnapshot query) => query.docs
             .map(
-              (doc) => ClienteModel.fromMap(doc.data()),
+              (doc) => ClienteModel.fromFirestore(doc),
             )
             .toList(),
       );
     } on Exception catch (e) {
       print(e);
       throw FirestoreException('Falha ao exibir os clientes!');
+    }
+  }
+
+  Future<void> editarCadastro(ClienteModel clienteModel) async {
+    try {
+      await _clientesCollection
+          .doc(clienteModel.codigo)
+          .set(clienteModel.toMap());
+    } catch (e) {
+      print(e);
+      throw FirestoreException('Falha ao editar os dados!');
     }
   }
 }

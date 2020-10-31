@@ -22,10 +22,7 @@ abstract class MensagensMixin {
     GlobalKey<ScaffoldState> key,
   }) =>
       _exibirSnackBar(
-          context: context,
-          message: message,
-          key: key,
-          color: Theme.of(context).primaryColor);
+          context: context, message: message, key: key, color: Colors.green);
 
   void _exibirSnackBar(
       {BuildContext context,

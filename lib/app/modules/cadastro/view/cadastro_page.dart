@@ -1,35 +1,32 @@
-import 'package:cliente/app/controllers/cadastro_controller.dart';
+import 'package:cliente/app/controllers/cliente_controller.dart';
 import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/shared/components/cliente_button.dart';
 import 'package:cliente/app/shared/components/cliente_input.dart';
 import 'package:cliente/app/shared/mixins/loader_mixin.dart';
 import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
-import 'package:cliente/app/views/home_page.dart';
+import 'package:cliente/app/modules/home/view/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
-import 'package:firebase_core/firebase_core.dart';
 
-class CadastrarUsuarioPage extends StatelessWidget {
-  static const router = '/CadastrarUsuario';
+class CadastroPage extends StatelessWidget {
+  static const router = '/Cadastro';
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => CadastroController(),
-      child: CadastrarUsuarioContent(),
+    return Scaffold(
+      body: CadastroContent(),
     );
   }
 }
 
-class CadastrarUsuarioContent extends StatefulWidget {
+class CadastroContent extends StatefulWidget {
   @override
-  _CadastrarUsuarioContentState createState() =>
-      _CadastrarUsuarioContentState();
+  _CadastroContentState createState() => _CadastroContentState();
 }
 
-class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
+class _CadastroContentState extends State<CadastroContent>
     with LoaderMixin, MensagensMixin {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nomeController = TextEditingController();
@@ -41,19 +38,44 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
   @override
   void initState() {
     super.initState();
-    final controller = context.read<CadastroController>();
+    final controller = context.read<ClienteController>();
+    nomeController.text = controller.cliente.nome ?? '';
+    sobrenomeController.text = controller.cliente.sobrenome ?? '';
+    emailController.text = controller.cliente.email ?? '';
+    telefoneController.text = controller.cliente.telefone?.toString() ?? '';
+    cepController.text = controller.cliente.cep?.toString() ?? '';
+
     controller.addListener(() async {
       if (this.mounted) {
         exibirLoaderHelper(context, controller.carregando);
 
-        if (!isNull(controller.error))
-          exibirErro(context: context, message: controller.error);
+        if (!isNull(controller.erro)) {
+          exibirErro(context: context, message: controller.erro);
+        }
 
-        if (controller.cadastroSuccess) {
-          Navigator.of(context).pushReplacementNamed(HomePage.router);
+        if (controller.cadastroSucesso || controller.edicaoSucesso) {
+          String mensagem = controller.cadastroSucesso
+              ? 'Cliente salvo com sucesso'
+              : 'Alteração salva com sucesso';
+          exibirSucesso(message: mensagem, context: context);
+          Future.delayed(
+              Duration(seconds: 1),
+              () =>
+                  Navigator.of(context).pushReplacementNamed(HomePage.router));
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    context.read<ClienteController>().limparDadosCliente();
+    nomeController.dispose();
+    sobrenomeController.dispose();
+    emailController.dispose();
+    telefoneController.dispose();
+    cepController.dispose();
   }
 
   @override
@@ -95,7 +117,7 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
                     child: Column(
                       children: [
                         ClienteInput(
-                          "Nome",
+                          label: "Nome",
                           controller: nomeController,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty)
@@ -105,7 +127,7 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
                           },
                         ),
                         ClienteInput(
-                          "Sobrenome",
+                          label: "Sobrenome",
                           controller: sobrenomeController,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty)
@@ -115,7 +137,7 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
                           },
                         ),
                         ClienteInput(
-                          "Email",
+                          label: "Email",
                           keyboardType: TextInputType.emailAddress,
                           controller: emailController,
                           validator: (value) {
@@ -126,7 +148,7 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
                           },
                         ),
                         ClienteInput(
-                          "Telefone",
+                          label: "Telefone",
                           keyboardType: TextInputType.phone,
                           controller: telefoneController,
                           helperText: "Digite apenas números",
@@ -137,7 +159,7 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
                           },
                         ),
                         ClienteInput(
-                          "Cep",
+                          label: "Cep",
                           keyboardType: TextInputType.phone,
                           controller: cepController,
                           helperText: "Digite apenas números",
@@ -156,7 +178,10 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
                           buttonColor: Theme.of(context).primaryColor,
                           textColor: Colors.white,
                           textStyle: TextStyle(fontSize: 16),
-                          onPressed: () => _salvarCliente(context),
+                          onPressed: () =>
+                              context.read<ClienteController>().editando
+                                  ? _editarCadastro(context)
+                                  : _salvarCliente(context),
                         ),
                       ],
                     ),
@@ -172,13 +197,27 @@ class _CadastrarUsuarioContentState extends State<CadastrarUsuarioContent>
 
   void _salvarCliente(BuildContext context) {
     if (_formKey.currentState.validate()) {
-      context.read<CadastroController>().cadastrarCliente(
-            new ClienteModel(
+      context.read<ClienteController>().cadastrarCliente(
+            ClienteModel(
               nome: nomeController.text,
               sobrenome: sobrenomeController.text,
               email: emailController.text,
               telefone: int.parse(telefoneController.text),
-              cep: int.parse(telefoneController.text),
+              cep: int.parse(cepController.text),
+            ),
+          );
+    }
+  }
+
+  void _editarCadastro(BuildContext context) {
+    if (_formKey.currentState.validate()) {
+      context.read<ClienteController>().editarCadastro(
+            ClienteModel(
+              nome: nomeController.text,
+              sobrenome: sobrenomeController.text,
+              email: emailController.text,
+              telefone: int.parse(telefoneController.text),
+              cep: int.parse(cepController.text),
             ),
           );
     }

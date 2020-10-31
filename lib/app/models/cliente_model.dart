@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ClienteModel {
+  String codigo;
   String nome;
   String sobrenome;
   String email;
@@ -11,6 +12,7 @@ class ClienteModel {
   int dataCadastro;
 
   ClienteModel({
+    this.codigo,
     this.nome,
     this.sobrenome,
     this.email,
@@ -32,10 +34,12 @@ class ClienteModel {
     };
   }
 
-  factory ClienteModel.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
+  factory ClienteModel.fromFirestore(DocumentSnapshot doc) {
+    if (doc.data() == null) return null;
+    Map map = doc.data();
 
     return ClienteModel(
+      codigo: doc.id,
       nome: map['nome'],
       sobrenome: map['sobrenome'],
       email: map['email'],
@@ -47,7 +51,4 @@ class ClienteModel {
   }
 
   String toJson() => json.encode(toMap());
-
-  factory ClienteModel.fromJson(String source) =>
-      ClienteModel.fromMap(json.decode(source));
 }

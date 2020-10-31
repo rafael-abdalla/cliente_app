@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'home_page.dart';
+import '../../home/view/home_page.dart';
 
 class SplashPage extends StatelessWidget {
   static const router = '/';

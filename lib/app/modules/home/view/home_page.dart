@@ -1,7 +1,8 @@
 import 'package:cliente/app/controllers/cliente_controller.dart';
 import 'package:cliente/app/models/cliente_model.dart';
-import 'package:cliente/app/repositories/cliente_repository.dart';
-import 'package:cliente/app/views/cadastro_page.dart';
+import 'package:cliente/app/models/controls/opcao_model.dart';
+import 'package:cliente/app/modules/cadastro/view/cadastro_page.dart';
+import 'package:cliente/app/modules/feedback/view/feedback_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
@@ -11,10 +12,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ClienteController(),
-      child: HomeContent(),
-    );
+    return HomeContent();
   }
 }
 
@@ -32,28 +30,43 @@ class _HomeContentState extends State<HomeContent> {
     controller = context.read<ClienteController>();
   }
 
+  List<OpcaoModel> opcoes = [
+    OpcaoModel(descricao: 'Feedback'),
+    OpcaoModel(descricao: 'Ajuda'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text('Cliente App'),
+        title: Text('App'),
         actions: [
           IconButton(
             color: Colors.white,
             icon: Icon(FontAwesome.user_plus),
             onPressed: () =>
-                Navigator.of(context).pushNamed(CadastrarUsuarioPage.router),
+                Navigator.of(context).pushNamed(CadastroPage.router),
           ),
           IconButton(
             color: Colors.white,
             icon: Icon(FontAwesome.search),
             onPressed: () {},
           ),
-          IconButton(
-            color: Colors.white,
+          PopupMenuButton(
+            elevation: 0,
             icon: Icon(FontAwesome.ellipsis_v),
-            onPressed: () {},
+            tooltip: 'Mais',
+            onSelected: (OpcaoModel opcao) =>
+                _selecionarCadastro(opcao.descricao),
+            itemBuilder: (BuildContext context) {
+              return opcoes.map((OpcaoModel opcao) {
+                return PopupMenuItem(
+                  value: opcao,
+                  child: Text(opcao.descricao),
+                );
+              }).toList();
+            },
           ),
           SizedBox(width: 5),
         ],
@@ -156,7 +169,7 @@ class _HomeContentState extends State<HomeContent> {
                 IconButton(
                   color: Colors.grey[600],
                   icon: Icon(FontAwesome.pencil),
-                  onPressed: () {},
+                  onPressed: () => _editarCadastro(clienteObj),
                 ),
                 Container(
                   height: 30,
@@ -166,7 +179,7 @@ class _HomeContentState extends State<HomeContent> {
                 IconButton(
                   color: Colors.red,
                   icon: Icon(FontAwesome.trash),
-                  onPressed: () {},
+                  onPressed: () => _excluirCadastro(clienteObj),
                 ),
               ],
             ),
@@ -175,4 +188,22 @@ class _HomeContentState extends State<HomeContent> {
       ),
     );
   }
+
+  void _selecionarCadastro(String opcaoSelecionada) {
+    switch (opcaoSelecionada) {
+      case "Feedback":
+        Navigator.of(context).pushNamed(FeedbackPage.router);
+        break;
+      case "Ajuda":
+        print('página com informações');
+        break;
+    }
+  }
+
+  void _editarCadastro(ClienteModel clienteObj) {
+    controller?.editarCadastro(clienteObj);
+    Navigator.of(context).pushNamed(CadastroPage.router);
+  }
+
+  void _excluirCadastro(ClienteModel clienteObj) {}
 }
