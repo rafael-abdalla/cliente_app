@@ -4,7 +4,6 @@ import 'package:cliente/app/shared/components/cliente_button.dart';
 import 'package:cliente/app/shared/components/cliente_input.dart';
 import 'package:cliente/app/shared/mixins/loader_mixin.dart';
 import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
-import 'package:cliente/app/modules/home/view/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
@@ -78,7 +77,7 @@ class _CadastroContentState extends State<CadastroContent>
           exibirSucesso(message: mensagem, context: context);
           Future.delayed(
             Duration(seconds: 1),
-            () => Navigator.of(context).pushReplacementNamed(HomePage.router),
+            () => Navigator.of(context).pop(),
           );
         }
       }

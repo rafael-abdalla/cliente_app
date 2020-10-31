@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cliente/app/modules/ajuda/view/ajuda_page.dart';
 import 'package:cliente/app/modules/home/controller/home_controller.dart';
 import 'package:cliente/app/models/cliente_model.dart';
@@ -10,6 +12,7 @@ import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validators/validators.dart';
 
 class HomePage extends StatelessWidget {
@@ -78,8 +81,16 @@ class _HomeContentState extends State<HomeContent>
             color: Colors.white,
             tooltip: 'Pesquisar',
             icon: Icon(FontAwesome.search),
-            onPressed: () {
-              showSearch(context: context, delegate: ClienteSearch());
+            onPressed: () async {
+              final sharedPreferences = await SharedPreferences.getInstance();
+              List listaSugestoes;
+              var buscas = sharedPreferences.getString('buscas');
+              if (buscas != null) listaSugestoes = jsonDecode(buscas);
+
+              showSearch(
+                context: context,
+                delegate: ClienteSearch(sugestoes: listaSugestoes),
+              );
             },
           ),
           PopupMenuButton(

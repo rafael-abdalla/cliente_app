@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/modules/cadastro/view/cadastro_page.dart';
 import 'package:cliente/app/modules/home/controller/home_controller.dart';
@@ -8,6 +10,7 @@ import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validators/validators.dart';
 
 class PesquisaResultadoPage extends StatelessWidget {
@@ -78,8 +81,16 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
             color: Theme.of(context).primaryColor,
             tooltip: 'Pesquisar',
             icon: Icon(FontAwesome.search),
-            onPressed: () {
-              showSearch(context: context, delegate: ClienteSearch());
+            onPressed: () async {
+              final sharedPreferences = await SharedPreferences.getInstance();
+              List listSugestoes;
+              var buscas = sharedPreferences.getString('buscas');
+              if (buscas != null) listSugestoes = jsonDecode(buscas);
+
+              showSearch(
+                context: context,
+                delegate: ClienteSearch(sugestoes: listSugestoes),
+              );
             },
           ),
           SizedBox(width: 5),
@@ -183,17 +194,24 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
                       backgroundColor: Colors.blue,
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(clienteObj.nome),
-                      Text(
-                        'Aparecida D´Oeste, SP',
-                        style: TextStyle(
-                          color: Colors.grey[600],
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.45,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          clienteObj.nome,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                        Text(
+                          'Aparecida D´Oeste, SP',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   Row(
                     children: [
