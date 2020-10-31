@@ -282,7 +282,7 @@ class _HomeContentState extends State<HomeContent>
     String prefixo = texto.substring(2, 7);
     String sufixo = texto.substring(7, 11);
 
-    return '($dd) $prefixo - $sufixo';
+    return '($dd) $prefixo-$sufixo';
   }
 
   String _formatarCep(int numero) {
