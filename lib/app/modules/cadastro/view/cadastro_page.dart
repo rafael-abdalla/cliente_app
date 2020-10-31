@@ -51,7 +51,6 @@ class _CadastroContentState extends State<CadastroContent>
     super.initState();
     final controller = context.read<CadastroController>();
     nomeController.text = widget.cliente.nome ?? '';
-    sobrenomeController.text = widget.cliente.sobrenome ?? '';
     emailController.text = widget.cliente.email ?? '';
     telefoneController.text = widget.cliente.telefone?.toString() ?? '';
     cepController.text = widget.cliente.cep?.toString() ?? '';
@@ -135,16 +134,6 @@ class _CadastroContentState extends State<CadastroContent>
                           },
                         ),
                         ClienteInput(
-                          label: "Sobrenome",
-                          controller: sobrenomeController,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty)
-                              return 'Sobrenome obrigatório';
-
-                            return null;
-                          },
-                        ),
-                        ClienteInput(
                           label: "E-mail",
                           keyboardType: TextInputType.emailAddress,
                           controller: emailController,
@@ -206,7 +195,6 @@ class _CadastroContentState extends State<CadastroContent>
             ClienteModel(
               codigo: widget.cliente.codigo,
               nome: nomeController.text,
-              sobrenome: sobrenomeController.text,
               email: emailController.text,
               telefone: int.parse(telefoneController.text),
               cep: int.parse(cepController.text),

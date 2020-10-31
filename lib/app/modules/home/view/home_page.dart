@@ -86,8 +86,7 @@ class _HomeContentState extends State<HomeContent>
             elevation: 0,
             icon: Icon(FontAwesome.ellipsis_v),
             tooltip: 'Mais',
-            onSelected: (OpcaoModel opcao) =>
-                _selecionarCadastro(opcao.descricao),
+            onSelected: (OpcaoModel opcao) => _selecionarOpcao(opcao.descricao),
             itemBuilder: (BuildContext context) {
               return opcoes.map((OpcaoModel opcao) {
                 return PopupMenuItem(
@@ -181,17 +180,25 @@ class _HomeContentState extends State<HomeContent>
                       backgroundColor: Colors.blue,
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(clienteObj.nome),
-                      Text(
-                        'Aparecida D´Oeste, SP',
-                        style: TextStyle(
-                          color: Colors.grey[600],
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.45,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          clienteObj.nome,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 2),
+                        Text(
+                          'Aparecida D´Oeste, SP',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   Row(
                     children: [
@@ -227,9 +234,7 @@ class _HomeContentState extends State<HomeContent>
                   style: TextStyle(color: Colors.blue),
                 ),
               ),
-              onTap: () {
-                print('abrir dialog contendo todas as informações do cliente');
-              },
+              onTap: () => _detalhesCliente(clienteObj),
             ),
           ],
         ),
@@ -237,7 +242,7 @@ class _HomeContentState extends State<HomeContent>
     );
   }
 
-  void _selecionarCadastro(String opcaoSelecionada) {
+  void _selecionarOpcao(String opcaoSelecionada) {
     switch (opcaoSelecionada) {
       case "Feedback":
         Navigator.of(context).pushNamed(FeedbackPage.router);
@@ -257,5 +262,77 @@ class _HomeContentState extends State<HomeContent>
 
   void _inativarCadastro(ClienteModel clienteObj) {
     controller?.inativarCadastro(clienteObj.codigo);
+  }
+
+  String _formatarTelefone(int numero) {
+    String texto = numero.toString();
+
+    String dd = texto.substring(0, 2);
+    String prefixo = texto.substring(2, 7);
+    String sufixo = texto.substring(7, 11);
+
+    return '($dd) $prefixo - $sufixo';
+  }
+
+  String _formatarCep(int numero) {
+    String texto = numero.toString();
+
+    String prefixo = texto.substring(0, 5);
+    String sufixo = texto.substring(5, 8);
+
+    return '$prefixo-$sufixo';
+  }
+
+  void _detalhesCliente(ClienteModel cliente) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Detalhes"),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _detalheText('Nome: ', cliente.nome),
+              SizedBox(height: 5),
+              _detalheText('E-mail: ', cliente.email),
+              SizedBox(height: 5),
+              _detalheText('Telefone: ', _formatarTelefone(cliente.telefone)),
+              SizedBox(height: 5),
+              _detalheText('Cep: ', _formatarCep(cliente.cep)),
+            ],
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Fechar"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  RichText _detalheText(campo, descricao) {
+    return RichText(
+      text: TextSpan(
+        text: campo,
+        style: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.w400,
+          fontSize: 15,
+        ),
+        children: [
+          TextSpan(
+            text: descricao,
+            style: TextStyle(
+              fontWeight: FontWeight.w400,
+              color: Colors.grey[700],
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

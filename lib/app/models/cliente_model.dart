@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ClienteModel {
   String codigo;
   String nome;
-  String sobrenome;
   String email;
   int telefone;
   int cep;
@@ -14,7 +13,6 @@ class ClienteModel {
   ClienteModel({
     this.codigo,
     this.nome,
-    this.sobrenome,
     this.email,
     this.telefone,
     this.cep,
@@ -25,7 +23,6 @@ class ClienteModel {
   Map<String, dynamic> toMap() {
     return {
       'nome': nome,
-      'sobrenome': sobrenome,
       'email': email,
       'telefone': telefone,
       'cep': cep,
@@ -41,7 +38,6 @@ class ClienteModel {
     return ClienteModel(
       codigo: doc.id,
       nome: map['nome'],
-      sobrenome: map['sobrenome'],
       email: map['email'],
       telefone: map['telefone'],
       cep: map['cep'],

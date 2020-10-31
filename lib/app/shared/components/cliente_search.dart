@@ -1,4 +1,3 @@
-import 'package:cliente/app/modules/home/view/home_page.dart';
 import 'package:cliente/app/modules/pesquisa/view/pesquisa_resultado_page.dart';
 import 'package:flutter/material.dart';
 

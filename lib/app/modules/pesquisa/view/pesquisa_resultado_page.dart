@@ -2,6 +2,7 @@ import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/modules/cadastro/view/cadastro_page.dart';
 import 'package:cliente/app/modules/home/controller/home_controller.dart';
 import 'package:cliente/app/repositories/cliente_repository.dart';
+import 'package:cliente/app/shared/components/cliente_search.dart';
 import 'package:cliente/app/shared/mixins/loader_mixin.dart';
 import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +73,17 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            color: Theme.of(context).primaryColor,
+            tooltip: 'Pesquisar',
+            icon: Icon(FontAwesome.search),
+            onPressed: () {
+              showSearch(context: context, delegate: ClienteSearch());
+            },
+          ),
+          SizedBox(width: 5),
+        ],
       ),
       body: StreamBuilder(
         stream: ClienteRepository().buscarPorNome(widget.pesquisa),
