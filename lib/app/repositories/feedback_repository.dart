@@ -5,9 +5,10 @@ class FeedbackRepository {
   final CollectionReference _feedbackCollection =
       FirebaseFirestore.instance.collection('feedbacks');
 
-  Future<void> enviarFeedback(String feedback) async {
+  Future<void> enviarFeedback(double avaliacao, String feedback) async {
     try {
       await _feedbackCollection.add({
+        'avaliacao': avaliacao,
         'texto': feedback,
         'dataEnvio': Timestamp.now().microsecondsSinceEpoch
       });

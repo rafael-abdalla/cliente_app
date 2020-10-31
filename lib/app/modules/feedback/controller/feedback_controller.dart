@@ -12,12 +12,12 @@ class FeedbackController extends ChangeNotifier {
   bool get envioSucesso => _envioSucesso;
   String get erro => _erro;
 
-  Future<void> enviarFeedback(String texto) async {
+  Future<void> enviarFeedback(double avaliacao, String texto) async {
     _carregando = true;
     _envioSucesso = false;
     notifyListeners();
     try {
-      await _repository.enviarFeedback(texto);
+      await _repository.enviarFeedback(avaliacao, texto);
       _carregando = false;
       _envioSucesso = true;
     } on FirestoreException catch (e) {

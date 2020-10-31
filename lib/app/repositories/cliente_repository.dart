@@ -29,7 +29,7 @@ class ClienteRepository {
       );
     } on Exception catch (e) {
       print(e);
-      throw FirestoreException('Falha ao exibir os clientes!');
+      throw FirestoreException('Falha ao carregar os clientes!');
     }
   }
 
@@ -50,6 +50,21 @@ class ClienteRepository {
     } catch (e) {
       print(e);
       throw FirestoreException('Falha ao inativar cliente!');
+    }
+  }
+
+  Stream<List<ClienteModel>> buscarPorNome(String pesquisa) {
+    try {
+      Stream<QuerySnapshot> stream =
+          _clientesCollection.where("ativo", isEqualTo: true).snapshots();
+
+      return stream.map((QuerySnapshot query) => query.docs
+          .map((doc) => ClienteModel.fromFirestore(doc))
+          .where((c) => c.nome.toLowerCase().contains(pesquisa.toLowerCase()))
+          .toList());
+    } on Exception catch (e) {
+      print(e);
+      throw FirestoreException('Falha ao buscar os clientes!');
     }
   }
 }

@@ -1,37 +1,41 @@
-import 'package:cliente/app/modules/ajuda/view/ajuda_page.dart';
-import 'package:cliente/app/modules/home/controller/home_controller.dart';
 import 'package:cliente/app/models/cliente_model.dart';
-import 'package:cliente/app/models/controls/opcao_model.dart';
 import 'package:cliente/app/modules/cadastro/view/cadastro_page.dart';
-import 'package:cliente/app/modules/feedback/view/feedback_page.dart';
-import 'package:cliente/app/shared/components/cliente_search.dart';
+import 'package:cliente/app/modules/home/controller/home_controller.dart';
+import 'package:cliente/app/repositories/cliente_repository.dart';
 import 'package:cliente/app/shared/mixins/loader_mixin.dart';
 import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:validators/validators.dart';
 
-class HomePage extends StatelessWidget {
-  static const router = '/Home';
+class PesquisaResultadoPage extends StatelessWidget {
+  final String pesquisa;
+
+  const PesquisaResultadoPage(this.pesquisa, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => HomeController(),
       child: Scaffold(
-        body: HomeContent(),
+        body: PesquisaResultadoContent(pesquisa),
       ),
     );
   }
 }
 
-class HomeContent extends StatefulWidget {
+class PesquisaResultadoContent extends StatefulWidget {
+  final String pesquisa;
+
+  const PesquisaResultadoContent(this.pesquisa, {Key key}) : super(key: key);
+
   @override
-  _HomeContentState createState() => _HomeContentState();
+  _PesquisaResultadoContentState createState() =>
+      _PesquisaResultadoContentState();
 }
 
-class _HomeContentState extends State<HomeContent>
+class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
     with LoaderMixin, MensagensMixin {
   HomeController controller;
 
@@ -55,53 +59,22 @@ class _HomeContentState extends State<HomeContent>
     });
   }
 
-  List<OpcaoModel> opcoes = [
-    OpcaoModel(descricao: 'Feedback'),
-    OpcaoModel(descricao: 'Ajuda'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text('App'),
-        actions: [
-          IconButton(
-            color: Colors.white,
-            tooltip: 'Cadastro',
-            icon: Icon(FontAwesome.user_plus),
-            onPressed: () =>
-                Navigator.of(context).pushNamed(CadastroPage.router),
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: Icon(
+            FontAwesome.arrow_left,
+            color: Theme.of(context).primaryColor,
           ),
-          IconButton(
-            color: Colors.white,
-            tooltip: 'Pesquisar',
-            icon: Icon(FontAwesome.search),
-            onPressed: () {
-              showSearch(context: context, delegate: ClienteSearch());
-            },
-          ),
-          PopupMenuButton(
-            elevation: 0,
-            icon: Icon(FontAwesome.ellipsis_v),
-            tooltip: 'Mais',
-            onSelected: (OpcaoModel opcao) =>
-                _selecionarCadastro(opcao.descricao),
-            itemBuilder: (BuildContext context) {
-              return opcoes.map((OpcaoModel opcao) {
-                return PopupMenuItem(
-                  value: opcao,
-                  child: Text(opcao.descricao),
-                );
-              }).toList();
-            },
-          ),
-          SizedBox(width: 5),
-        ],
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: StreamBuilder(
-        stream: controller?.listarClientes(),
+        stream: ClienteRepository().buscarPorNome(widget.pesquisa),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasError) {
             print(snapshot.error);
@@ -117,24 +90,41 @@ class _HomeContentState extends State<HomeContent>
 
             switch (snapshot.connectionState) {
               case ConnectionState.active:
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 10),
-                        ListView.builder(
-                          itemCount: clientes.length,
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) {
-                            return _buildContainer(context, clientes[index]);
-                          },
+                return clientes.length > 0
+                    ? SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              SizedBox(height: 10),
+                              Text(
+                                'Resultados para "${widget.pesquisa}"',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              ListView.builder(
+                                itemCount: clientes.length,
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemBuilder: (context, index) {
+                                  return _buildContainer(
+                                      context, clientes[index]);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                );
+                      )
+                    : Center(
+                        child: Text(
+                          'Nenhum resultado encontrado',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      );
                 break;
               default:
                 return Center(
@@ -235,17 +225,6 @@ class _HomeContentState extends State<HomeContent>
         ),
       ),
     );
-  }
-
-  void _selecionarCadastro(String opcaoSelecionada) {
-    switch (opcaoSelecionada) {
-      case "Feedback":
-        Navigator.of(context).pushNamed(FeedbackPage.router);
-        break;
-      case "Ajuda":
-        Navigator.of(context).pushNamed(AjudaPage.router);
-        break;
-    }
   }
 
   void _editarCadastro(ClienteModel clienteObj) {
