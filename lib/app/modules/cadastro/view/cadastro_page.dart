@@ -263,7 +263,8 @@ class _CadastroContentState extends State<CadastroContent>
       controller.enviarCadastro(
         ClienteModel(
           docId: widget.cliente.docId,
-          codigo: Timestamp.now().microsecondsSinceEpoch,
+          codigo:
+              widget.cliente.codigo ?? Timestamp.now().microsecondsSinceEpoch,
           nome: nomeController.text,
           email: emailController.text,
           telefone: int.parse(telefoneController.text),

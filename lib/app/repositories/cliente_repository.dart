@@ -13,7 +13,7 @@ class ClienteRepository {
   Future<void> novoCadastro(ClienteModel clienteModel) async {
     try {
       await _clientesCollection.add(clienteModel.toMap());
-    } on Exception catch (e) {
+    } catch (e) {
       print(e);
       throw FirestoreException('Falha ao salvar os dados!');
     }
@@ -31,7 +31,7 @@ class ClienteRepository {
             )
             .toList(),
       );
-    } on Exception catch (e) {
+    } catch (e) {
       print(e);
       throw FirestoreException('Falha ao carregar os clientes!');
     }
@@ -66,7 +66,7 @@ class ClienteRepository {
           .map((doc) => ClienteModel.fromFirestore(doc))
           .where((c) => c.nome.toLowerCase().contains(pesquisa.toLowerCase()))
           .toList());
-    } on Exception catch (e) {
+    } catch (e) {
       print(e);
       throw FirestoreException('Falha ao buscar os clientes!');
     }
