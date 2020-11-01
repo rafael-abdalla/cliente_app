@@ -115,7 +115,6 @@ class _FeedbackContentState extends State<FeedbackContent>
                   child: ClienteInput(
                     controller: _textoController,
                     hintText: 'Descreva suas impressões',
-                    maxLength: 110,
                     lines: 6,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty)

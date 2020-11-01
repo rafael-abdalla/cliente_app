@@ -81,7 +81,9 @@ class ClienteSearch extends SearchDelegate<String> {
       sugestoes = List();
     }
 
-    sugestoes.add(query);
+    var verificaSugestao =
+        sugestoes.firstWhere((x) => x == query, orElse: () => null);
+    if (verificaSugestao == null) sugestoes.add(query);
 
     sharedPreferences.setString('buscas', jsonEncode(sugestoes));
 

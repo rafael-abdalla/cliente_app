@@ -31,7 +31,7 @@ class AjudaContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: 10),
+              SizedBox(height: 5),
               Text(
                 'Ajuda',
                 style: TextStyle(
@@ -43,12 +43,25 @@ class AjudaContent extends StatelessWidget {
               Text(
                 'O texto abaixo tem o objetivo de explicar as funcionalidades do aplicativo.',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
                 ),
-              )
+              ),
+              SizedBox(height: 14),
+              _textoAjuda('Campos com * são obrigatórios'),
+              _textoAjuda('Campos com * são obrigatórios'),
+              _textoAjuda('Campos com * são obrigatórios'),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Text _textoAjuda(String texto) {
+    return Text(
+      'Campos com * são obrigatórios\n',
+      style: TextStyle(
+        fontSize: 16,
       ),
     );
   }

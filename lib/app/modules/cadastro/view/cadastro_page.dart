@@ -1,13 +1,19 @@
+import 'dart:io';
+
 import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/modules/cadastro/controller/cadastro_controller.dart';
+import 'package:cliente/app/modules/camera/view/camera_page.dart';
 import 'package:cliente/app/shared/components/cliente_button.dart';
+import 'package:cliente/app/shared/components/cliente_circular_icon_button.dart';
 import 'package:cliente/app/shared/components/cliente_input.dart';
 import 'package:cliente/app/shared/mixins/loader_mixin.dart';
 import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
+import 'package:camera/camera.dart';
 
 class CadastroPage extends StatelessWidget {
   static const router = '/Cadastro';
@@ -38,17 +44,25 @@ class CadastroContent extends StatefulWidget {
 
 class _CadastroContentState extends State<CadastroContent>
     with LoaderMixin, MensagensMixin {
+  List<CameraDescription> cameras;
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController sobrenomeController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController telefoneController = TextEditingController();
   final TextEditingController cepController = TextEditingController();
+  CadastroController controller;
+
+  Future<Null> carregarCameras() async {
+    cameras = await availableCameras();
+  }
 
   @override
   void initState() {
     super.initState();
-    final controller = context.read<CadastroController>();
+    carregarCameras();
+    controller = context.read<CadastroController>();
     nomeController.text = widget.cliente.nome ?? '';
     emailController.text = widget.cliente.email ?? '';
     telefoneController.text = widget.cliente.telefone?.toString() ?? '';
@@ -106,24 +120,73 @@ class _CadastroContentState extends State<CadastroContent>
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 10),
-                  Text(
-                    'Olá,\nFaça o cadastro para continuar',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+                  SizedBox(height: 5),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Olá,\nFaça o cadastro para continuar',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 10),
+                  Stack(
+                    children: [
+                      Consumer<CadastroController>(
+                        builder: (_, cadastroController, __) {
+                          if (cadastroController.caminhoImagem.isNotEmpty) {
+                            return CircleAvatar(
+                              radius: 70,
+                              backgroundImage: FileImage(
+                                File(cadastroController.caminhoImagem),
+                              ),
+                            );
+                          } else if (widget.cliente.caminhoImagem != null &&
+                              widget.cliente.caminhoImagem.isNotEmpty) {
+                            return CircleAvatar(
+                              radius: 70,
+                              backgroundImage:
+                                  NetworkImage(widget.cliente.caminhoImagem),
+                            );
+                          } else {
+                            return CircleAvatar(
+                              radius: 70,
+                              backgroundImage: AssetImage(
+                                'assets/images/empty-user.png',
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: -10,
+                        child: ClienteCircularIconButton(
+                          Theme.of(context).primaryColor,
+                          FontAwesome.camera,
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CameraPage(
+                                cameras,
+                                controller,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   Form(
                     key: _formKey,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     child: Column(
                       children: [
                         ClienteInput(
-                          label: "Nome",
+                          label: "Nome *",
                           controller: nomeController,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty)
@@ -133,34 +196,41 @@ class _CadastroContentState extends State<CadastroContent>
                           },
                         ),
                         ClienteInput(
-                          label: "E-mail",
+                          label: "E-mail *",
                           keyboardType: TextInputType.emailAddress,
                           controller: emailController,
                           validator: (value) {
-                            if (!isEmail(value?.toString() ?? ''))
+                            if (value == null || value.trim().isEmpty)
+                              return 'E-mail obrigatório';
+                            else if (!isEmail(value?.toString() ?? ''))
                               return 'E-mail inválido';
 
                             return null;
                           },
                         ),
                         ClienteInput(
-                          label: "Telefone",
+                          label: "Telefone *",
                           keyboardType: TextInputType.phone,
                           controller: telefoneController,
-                          helperText: "Digite apenas números",
                           validator: (value) {
-                            if (!isNumeric(value)) return 'Telefone inválido';
+                            if (value == null || value.trim().isEmpty)
+                              return 'Telefone obrigatório';
+                            if (!isNumeric(value))
+                              return 'Digite apenas números';
 
                             return null;
                           },
                         ),
                         ClienteInput(
-                          label: "Cep",
+                          label: "Cep *",
                           keyboardType: TextInputType.phone,
                           controller: cepController,
-                          helperText: "Digite apenas números",
                           validator: (value) {
-                            if (!(isNumeric(value) && (value?.length == 8)))
+                            if (value == null || value.trim().isEmpty)
+                              return 'Cep obrigatório';
+                            else if (!isNumeric(value))
+                              return "Digte apenas números";
+                            else if (!(value.length == 8))
                               return 'Cep inválido';
 
                             return null;
@@ -190,15 +260,16 @@ class _CadastroContentState extends State<CadastroContent>
 
   void _enviarCadastro(BuildContext context) {
     if (_formKey.currentState.validate()) {
-      context.read<CadastroController>().enviarCadastro(
-            ClienteModel(
-              codigo: widget.cliente.codigo,
-              nome: nomeController.text,
-              email: emailController.text,
-              telefone: int.parse(telefoneController.text),
-              cep: int.parse(cepController.text),
-            ),
-          );
+      controller.enviarCadastro(
+        ClienteModel(
+          docId: widget.cliente.docId,
+          codigo: Timestamp.now().microsecondsSinceEpoch,
+          nome: nomeController.text,
+          email: emailController.text,
+          telefone: int.parse(telefoneController.text),
+          cep: int.parse(cepController.text),
+        ),
+      );
     }
   }
 }

@@ -186,10 +186,18 @@ class _HomeContentState extends State<HomeContent>
                 children: [
                   Container(
                     width: MediaQuery.of(context).size.width * 0.1,
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.blue,
-                    ),
+                    child: (clienteObj.caminhoImagem != null &&
+                            clienteObj.caminhoImagem.isNotEmpty)
+                        ? CircleAvatar(
+                            radius: 20,
+                            backgroundImage:
+                                NetworkImage(clienteObj.caminhoImagem),
+                          )
+                        : CircleAvatar(
+                            radius: 20,
+                            backgroundImage:
+                                AssetImage('assets/images/empty-user.png'),
+                          ),
                   ),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.45,
@@ -202,7 +210,7 @@ class _HomeContentState extends State<HomeContent>
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Aparecida D´Oeste, SP',
+                          clienteObj.email,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Colors.grey[600],
@@ -272,7 +280,7 @@ class _HomeContentState extends State<HomeContent>
   }
 
   void _inativarCadastro(ClienteModel clienteObj) {
-    controller?.inativarCadastro(clienteObj.codigo);
+    controller?.inativarCadastro(clienteObj.docId);
   }
 
   String _formatarTelefone(int numero) {

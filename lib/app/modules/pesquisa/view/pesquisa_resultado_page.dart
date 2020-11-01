@@ -265,6 +265,6 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
   }
 
   void _inativarCadastro(ClienteModel clienteObj) {
-    controller?.inativarCadastro(clienteObj.codigo);
+    controller?.inativarCadastro(clienteObj.docId);
   }
 }
