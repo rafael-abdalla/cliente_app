@@ -4,6 +4,9 @@ import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/modules/cadastro/view/cadastro_page.dart';
 import 'package:cliente/app/modules/home/controller/home_controller.dart';
 import 'package:cliente/app/repositories/cliente_repository.dart';
+import 'package:cliente/app/shared/cliente_formats.dart';
+import 'package:cliente/app/shared/components/cliente_circular_progress_indicator.dart';
+import 'package:cliente/app/shared/components/cliente_container_content.dart';
 import 'package:cliente/app/shared/components/cliente_search.dart';
 import 'package:cliente/app/shared/mixins/loader_mixin.dart';
 import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
@@ -134,8 +137,15 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
                                 physics: const NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,
                                 itemBuilder: (context, index) {
-                                  return _buildContainer(
-                                      context, clientes[index]);
+                                  ClienteModel clienteObj = clientes[index];
+
+                                  return ClienteContainerContent(
+                                    MediaQuery.of(context).size.width,
+                                    clienteObj,
+                                    () => _editarCadastro(clienteObj),
+                                    () => _inativarCadastro(clienteObj),
+                                    () => _detalhesCliente(clienteObj),
+                                  );
                                 },
                               ),
                             ],
@@ -150,109 +160,13 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
                       );
                 break;
               default:
-                return Center(
-                  child: CircularProgressIndicator(
-                    valueColor: new AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).primaryColor),
-                  ),
+                return ClienteCircularProgressIndicator(
+                  Theme.of(context).primaryColor,
                 );
                 break;
             }
           }
         },
-      ),
-    );
-  }
-
-  Widget _buildContainer(BuildContext context, ClienteModel clienteObj) {
-    return Container(
-      margin: const EdgeInsets.only(top: 15),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 3,
-            blurRadius: 5,
-          ),
-        ],
-        color: Colors.white,
-      ),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.1,
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.blue,
-                    ),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.45,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          clienteObj.nome,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'Aparecida D´Oeste, SP',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        color: Colors.grey[600],
-                        icon: Icon(FontAwesome.pencil),
-                        onPressed: () => _editarCadastro(clienteObj),
-                      ),
-                      Container(
-                        height: 30,
-                        width: 0.3,
-                        color: Colors.grey,
-                      ),
-                      IconButton(
-                        color: Colors.red,
-                        icon: Icon(FontAwesome.trash),
-                        onPressed: () => _inativarCadastro(clienteObj),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              height: 0.5,
-              color: Colors.grey[300],
-            ),
-            GestureDetector(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Detalhes',
-                  style: TextStyle(color: Colors.blue),
-                ),
-              ),
-              onTap: () {
-                print('abrir dialog contendo todas as informações do cliente');
-              },
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -266,5 +180,59 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
 
   void _inativarCadastro(ClienteModel clienteObj) {
     controller?.inativarCadastro(clienteObj.docId);
+  }
+
+  void _detalhesCliente(ClienteModel cliente) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Detalhes"),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _detalheText('Nome: ', cliente.nome),
+              SizedBox(height: 5),
+              _detalheText('E-mail: ', cliente.email),
+              SizedBox(height: 5),
+              _detalheText('Telefone: ',
+                  ClienteFormats().formatarTelefone(cliente.telefone)),
+              SizedBox(height: 5),
+              _detalheText('Cep: ', ClienteFormats().formatarCep(cliente.cep)),
+            ],
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Fechar"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  RichText _detalheText(campo, descricao) {
+    return RichText(
+      text: TextSpan(
+        text: campo,
+        style: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.w400,
+          fontSize: 15,
+        ),
+        children: [
+          TextSpan(
+            text: descricao,
+            style: TextStyle(
+              fontWeight: FontWeight.w400,
+              color: Colors.grey[700],
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

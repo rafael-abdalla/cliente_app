@@ -64,6 +64,13 @@ class ClienteSearch extends SearchDelegate<String> {
                 ),
               ),
               trailing: Icon(Icons.north_west),
+              onTap: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      PesquisaResultadoPage(sugestaoFiltro[index]),
+                ),
+              ),
             ),
           )
         : Container();
