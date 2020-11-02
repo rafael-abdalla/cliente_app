@@ -2,8 +2,8 @@ import 'package:cliente/app/models/cliente_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
-class ClienteContainerContent extends Container {
-  ClienteContainerContent(
+class ClienteContainerInformation extends Container {
+  ClienteContainerInformation(
     double width,
     ClienteModel clienteObj,
     Function editar,

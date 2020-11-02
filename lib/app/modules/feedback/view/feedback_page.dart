@@ -74,7 +74,7 @@ class _FeedbackContentState extends State<FeedbackContent>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: 10),
+                SizedBox(height: 5),
                 Text(
                   'Feedback',
                   style: TextStyle(

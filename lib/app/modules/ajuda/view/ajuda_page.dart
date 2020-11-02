@@ -47,9 +47,39 @@ class AjudaContent extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 14),
-              _textoAjuda('Campos com * são obrigatórios'),
-              _textoAjuda('Campos com * são obrigatórios'),
-              _textoAjuda('Campos com * são obrigatórios'),
+              _titulo('Campos'),
+              _textoAjudo(context, 'Campos com * são obrigatórios'),
+              _textoAjudo(context,
+                  'Campos incorretos ficaram em vermelho durante a digitação'),
+              _textoAjudo(context,
+                  'Enquanto houverem campos incorretos, os dados não poderão ser enviados'),
+              SizedBox(height: 10),
+              _titulo('Botões'),
+              _textoAjudo(
+                context,
+                'Abre o formulário para o cadastro de cliente',
+                icone: FontAwesome.user_plus,
+              ),
+              _textoAjudo(
+                context,
+                'Abre a pesquisa de cliente',
+                icone: FontAwesome.search,
+              ),
+              _textoAjudo(
+                context,
+                'Volta para a tela anterior',
+                icone: FontAwesome.arrow_left,
+              ),
+              _textoAjudo(
+                context,
+                'Abre a câmera ou captura a foto',
+                icone: FontAwesome.camera,
+              ),
+              _textoAjudo(
+                context,
+                'Confirma ques está sendo visualizada',
+                icone: FontAwesome.check,
+              ),
             ],
           ),
         ),
@@ -57,12 +87,44 @@ class AjudaContent extends StatelessWidget {
     );
   }
 
-  Text _textoAjuda(String texto) {
-    return Text(
-      'Campos com * são obrigatórios\n',
-      style: TextStyle(
-        fontSize: 16,
+  Container _titulo(String texto) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 5),
+      child: Text(
+        texto,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
       ),
+    );
+  }
+
+  Container _textoAjudo(BuildContext context, String texto, {IconData icone}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: (icone != null)
+          ? Row(
+              children: [
+                Icon(icone),
+                SizedBox(width: 15),
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  child: Text(
+                    texto,
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : Text(
+              texto,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
     );
   }
 }

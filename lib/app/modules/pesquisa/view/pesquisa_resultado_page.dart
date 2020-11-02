@@ -4,9 +4,9 @@ import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/modules/cadastro/view/cadastro_page.dart';
 import 'package:cliente/app/modules/home/controller/home_controller.dart';
 import 'package:cliente/app/repositories/cliente_repository.dart';
-import 'package:cliente/app/shared/cliente_formats.dart';
 import 'package:cliente/app/shared/components/cliente_circular_progress_indicator.dart';
-import 'package:cliente/app/shared/components/cliente_container_content.dart';
+import 'package:cliente/app/shared/components/cliente_container_information.dart';
+import 'package:cliente/app/shared/components/cliente_modal_bottom_sheet_information.dart';
 import 'package:cliente/app/shared/components/cliente_search.dart';
 import 'package:cliente/app/shared/mixins/loader_mixin.dart';
 import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
@@ -123,7 +123,7 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              SizedBox(height: 10),
+                              SizedBox(height: 5),
                               Text(
                                 'Resultados para "${widget.pesquisa}"',
                                 style: TextStyle(
@@ -132,22 +132,17 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
                                 ),
                               ),
                               SizedBox(height: 10),
-                              ListView.builder(
-                                itemCount: clientes.length,
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                itemBuilder: (context, index) {
-                                  ClienteModel clienteObj = clientes[index];
-
-                                  return ClienteContainerContent(
-                                    MediaQuery.of(context).size.width,
-                                    clienteObj,
-                                    () => _editarCadastro(clienteObj),
-                                    () => _inativarCadastro(clienteObj),
-                                    () => _detalhesCliente(clienteObj),
-                                  );
-                                },
+                              ...clientes.map<Widget>(
+                                (cliente) => ClienteContainerInformation(
+                                  MediaQuery.of(context).size.width,
+                                  cliente,
+                                  () => _editarCadastro(cliente),
+                                  () => _inativarCadastro(cliente),
+                                  () => _informacoesModalBottomSheet(
+                                      context, cliente),
+                                ),
                               ),
+                              SizedBox(height: 10),
                             ],
                           ),
                         ),
@@ -182,57 +177,13 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
     controller?.inativarCadastro(clienteObj.docId);
   }
 
-  void _detalhesCliente(ClienteModel cliente) {
-    showDialog(
+  void _informacoesModalBottomSheet(context, ClienteModel cliente) {
+    showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Detalhes"),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _detalheText('Nome: ', cliente.nome),
-              SizedBox(height: 5),
-              _detalheText('E-mail: ', cliente.email),
-              SizedBox(height: 5),
-              _detalheText('Telefone: ',
-                  ClienteFormats().formatarTelefone(cliente.telefone)),
-              SizedBox(height: 5),
-              _detalheText('Cep: ', ClienteFormats().formatarCep(cliente.cep)),
-            ],
-          ),
-          actions: <Widget>[
-            new FlatButton(
-              child: new Text("Fechar"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        );
+      isScrollControlled: true,
+      builder: (BuildContext bc) {
+        return ClienteModalBottomSheetInformation(context, cliente);
       },
-    );
-  }
-
-  RichText _detalheText(campo, descricao) {
-    return RichText(
-      text: TextSpan(
-        text: campo,
-        style: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w400,
-          fontSize: 15,
-        ),
-        children: [
-          TextSpan(
-            text: descricao,
-            style: TextStyle(
-              fontWeight: FontWeight.w400,
-              color: Colors.grey[700],
-              fontSize: 15,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
