@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/modules/cadastro/view/cadastro_page.dart';
 import 'package:cliente/app/modules/home/controller/home_controller.dart';
@@ -8,6 +7,7 @@ import 'package:cliente/app/shared/components/cliente_circular_progress_indicato
 import 'package:cliente/app/shared/components/cliente_container_information.dart';
 import 'package:cliente/app/shared/components/cliente_modal_bottom_sheet_information.dart';
 import 'package:cliente/app/shared/components/cliente_search.dart';
+import 'package:cliente/app/shared/components/cliente_message_error.dart';
 import 'package:cliente/app/shared/mixins/loader_mixin.dart';
 import 'package:cliente/app/shared/mixins/mensagens_mixin.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +26,36 @@ class PesquisaResultadoPage extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => HomeController(),
       child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: Icon(
+              FontAwesome.arrow_left,
+              color: Theme.of(context).primaryColor,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          actions: [
+            IconButton(
+              color: Theme.of(context).primaryColor,
+              tooltip: 'Pesquisar',
+              icon: Icon(FontAwesome.search),
+              onPressed: () async {
+                final sharedPreferences = await SharedPreferences.getInstance();
+                List listSugestoes;
+                var buscas = sharedPreferences.getString('buscas');
+                if (buscas != null) listSugestoes = jsonDecode(buscas);
+
+                showSearch(
+                  context: context,
+                  delegate: ClienteSearch(sugestoes: listSugestoes),
+                );
+              },
+            ),
+            SizedBox(width: 5),
+          ],
+        ),
         body: PesquisaResultadoContent(pesquisa),
       ),
     );
@@ -68,101 +98,60 @@ class _PesquisaResultadoContentState extends State<PesquisaResultadoContent>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(
-            FontAwesome.arrow_left,
-            color: Theme.of(context).primaryColor,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        actions: [
-          IconButton(
-            color: Theme.of(context).primaryColor,
-            tooltip: 'Pesquisar',
-            icon: Icon(FontAwesome.search),
-            onPressed: () async {
-              final sharedPreferences = await SharedPreferences.getInstance();
-              List listSugestoes;
-              var buscas = sharedPreferences.getString('buscas');
-              if (buscas != null) listSugestoes = jsonDecode(buscas);
+    return StreamBuilder(
+      stream: ClienteRepository().buscarPorNome(widget.pesquisa),
+      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        if (snapshot.hasError) {
+          print(snapshot.error);
+          return ClienteMessageError(
+              ':(\nNão foi possível carregar os dados\nTente mais tarde');
+        } else {
+          List<ClienteModel> clientes = snapshot.data;
 
-              showSearch(
-                context: context,
-                delegate: ClienteSearch(sugestoes: listSugestoes),
+          switch (snapshot.connectionState) {
+            case ConnectionState.active:
+              return (clientes.length > 0)
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SizedBox(height: 5),
+                            Text(
+                              'Resultados para "${widget.pesquisa}"',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            ...clientes.map<Widget>(
+                              (cliente) => ClienteContainerInformation(
+                                MediaQuery.of(context).size.width,
+                                cliente,
+                                () => _editarCadastro(cliente),
+                                () => _inativarCadastro(cliente),
+                                () => _informacoesModalBottomSheet(
+                                    context, cliente),
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                          ],
+                        ),
+                      ),
+                    )
+                  : ClienteMessageError(
+                      'Nenhum resultado encontrado para "${widget.pesquisa}"');
+              break;
+            default:
+              return ClienteCircularProgressIndicator(
+                Theme.of(context).primaryColor,
               );
-            },
-          ),
-          SizedBox(width: 5),
-        ],
-      ),
-      body: StreamBuilder(
-        stream: ClienteRepository().buscarPorNome(widget.pesquisa),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.hasError) {
-            print(snapshot.error);
-            return Center(
-              child: Text(
-                ':(\nNão foi possível carregar os dados\nTente mais tarde',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18),
-              ),
-            );
-          } else {
-            List<ClienteModel> clientes = snapshot.data;
-
-            switch (snapshot.connectionState) {
-              case ConnectionState.active:
-                return clientes.length > 0
-                    ? SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              SizedBox(height: 5),
-                              Text(
-                                'Resultados para "${widget.pesquisa}"',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              ...clientes.map<Widget>(
-                                (cliente) => ClienteContainerInformation(
-                                  MediaQuery.of(context).size.width,
-                                  cliente,
-                                  () => _editarCadastro(cliente),
-                                  () => _inativarCadastro(cliente),
-                                  () => _informacoesModalBottomSheet(
-                                      context, cliente),
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                            ],
-                          ),
-                        ),
-                      )
-                    : Center(
-                        child: Text(
-                          'Nenhum resultado encontrado',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      );
-                break;
-              default:
-                return ClienteCircularProgressIndicator(
-                  Theme.of(context).primaryColor,
-                );
-                break;
-            }
+              break;
           }
-        },
-      ),
+        }
+      },
     );
   }
 

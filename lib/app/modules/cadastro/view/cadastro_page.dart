@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cliente/app/modules/cadastro/controller/cadastro_controller.dart';
 import 'package:cliente/app/modules/camera/view/camera_page.dart';
@@ -27,6 +26,17 @@ class CadastroPage extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => CadastroController(),
       child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: Icon(
+              FontAwesome.arrow_left,
+              color: Theme.of(context).primaryColor,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         body: CadastroContent(cliente),
       ),
     );
@@ -100,157 +110,142 @@ class _CadastroContentState extends State<CadastroContent>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(
-            FontAwesome.arrow_left,
-            color: Theme.of(context).primaryColor,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: SafeArea(
-        child: ScrollConfiguration(
-          behavior: new ScrollBehavior()
-            ..buildViewportChrome(context, null, AxisDirection.down),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  SizedBox(height: 5),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Olá,\nFaça o cadastro para continuar',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
+    return SafeArea(
+      child: ScrollConfiguration(
+        behavior: new ScrollBehavior()
+          ..buildViewportChrome(context, null, AxisDirection.down),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                SizedBox(height: 5),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Olá,\nFaça o cadastro para continuar',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Stack(
-                    children: [
-                      Consumer<CadastroController>(
-                        builder: (_, cadastroController, __) {
-                          if (cadastroController.caminhoImagem.isNotEmpty) {
-                            return CircleAvatar(
-                              radius: 70,
-                              backgroundImage: FileImage(
-                                File(cadastroController.caminhoImagem),
-                              ),
-                            );
-                          } else if (widget.cliente.caminhoImagem != null &&
-                              widget.cliente.caminhoImagem.isNotEmpty) {
-                            return CircleAvatar(
-                              radius: 70,
-                              backgroundImage:
-                                  NetworkImage(widget.cliente.caminhoImagem),
-                            );
-                          } else {
-                            return CircleAvatar(
-                              radius: 70,
-                              backgroundImage: AssetImage(
-                                'assets/images/empty-user.png',
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: -10,
-                        child: ClienteCircularIconButton(
-                          Theme.of(context).primaryColor,
-                          FontAwesome.camera,
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CameraPage(
-                                cameras,
-                                controller,
-                              ),
+                ),
+                SizedBox(height: 10),
+                Stack(
+                  children: [
+                    Consumer<CadastroController>(
+                      builder: (_, cadastroController, __) {
+                        if (cadastroController.caminhoImagem.isNotEmpty) {
+                          return CircleAvatar(
+                            radius: 70,
+                            backgroundImage: FileImage(
+                              File(cadastroController.caminhoImagem),
+                            ),
+                          );
+                        } else if (widget.cliente.caminhoImagem != null &&
+                            widget.cliente.caminhoImagem.isNotEmpty) {
+                          return CircleAvatar(
+                            radius: 70,
+                            backgroundImage:
+                                NetworkImage(widget.cliente.caminhoImagem),
+                          );
+                        } else {
+                          return CircleAvatar(
+                            radius: 70,
+                            backgroundImage: AssetImage(
+                              'assets/images/empty-user.png',
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: -10,
+                      child: ClienteCircularIconButton(
+                        Theme.of(context).primaryColor,
+                        FontAwesome.camera,
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CameraPage(
+                              cameras,
+                              controller,
                             ),
                           ),
                         ),
                       ),
+                    ),
+                  ],
+                ),
+                Form(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  child: Column(
+                    children: [
+                      ClienteInput(
+                        label: "Nome *",
+                        controller: nomeController,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty)
+                            return 'Nome obrigatório';
+
+                          return null;
+                        },
+                      ),
+                      ClienteInput(
+                        label: "E-mail *",
+                        keyboardType: TextInputType.emailAddress,
+                        controller: emailController,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty)
+                            return 'E-mail obrigatório';
+                          else if (!isEmail(value?.toString() ?? ''))
+                            return 'E-mail inválido';
+
+                          return null;
+                        },
+                      ),
+                      ClienteInput(
+                        label: "Telefone *",
+                        keyboardType: TextInputType.phone,
+                        controller: telefoneController,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty)
+                            return 'Telefone obrigatório';
+                          if (!isNumeric(value)) return 'Digite apenas números';
+
+                          return null;
+                        },
+                      ),
+                      ClienteInput(
+                        label: "Cep *",
+                        keyboardType: TextInputType.phone,
+                        controller: cepController,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty)
+                            return 'Cep obrigatório';
+                          else if (!isNumeric(value))
+                            return "Digte apenas números";
+                          else if (!(value.length == 8)) return 'Cep inválido';
+
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 20),
+                      ClienteButton(
+                        'Salvar',
+                        width: MediaQuery.of(context).size.width,
+                        height: 45,
+                        buttonColor: Theme.of(context).primaryColor,
+                        textColor: Colors.white,
+                        textStyle: TextStyle(fontSize: 16),
+                        onPressed: () => _enviarCadastro(context),
+                      ),
                     ],
                   ),
-                  Form(
-                    key: _formKey,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    child: Column(
-                      children: [
-                        ClienteInput(
-                          label: "Nome *",
-                          controller: nomeController,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty)
-                              return 'Nome obrigatório';
-
-                            return null;
-                          },
-                        ),
-                        ClienteInput(
-                          label: "E-mail *",
-                          keyboardType: TextInputType.emailAddress,
-                          controller: emailController,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty)
-                              return 'E-mail obrigatório';
-                            else if (!isEmail(value?.toString() ?? ''))
-                              return 'E-mail inválido';
-
-                            return null;
-                          },
-                        ),
-                        ClienteInput(
-                          label: "Telefone *",
-                          keyboardType: TextInputType.phone,
-                          controller: telefoneController,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty)
-                              return 'Telefone obrigatório';
-                            if (!isNumeric(value))
-                              return 'Digite apenas números';
-
-                            return null;
-                          },
-                        ),
-                        ClienteInput(
-                          label: "Cep *",
-                          keyboardType: TextInputType.phone,
-                          controller: cepController,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty)
-                              return 'Cep obrigatório';
-                            else if (!isNumeric(value))
-                              return "Digte apenas números";
-                            else if (!(value.length == 8))
-                              return 'Cep inválido';
-
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        ClienteButton(
-                          'Salvar',
-                          width: MediaQuery.of(context).size.width,
-                          height: 45,
-                          buttonColor: Theme.of(context).primaryColor,
-                          textColor: Colors.white,
-                          textStyle: TextStyle(fontSize: 16),
-                          onPressed: () => _enviarCadastro(context),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                )
+              ],
             ),
           ),
         ),

@@ -1,6 +1,5 @@
-import 'dart:async';
 import 'dart:io';
-
+import 'dart:async';
 import 'package:cliente/app/exceptions/firestore_exception.dart';
 import 'package:cliente/app/models/cliente_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -73,20 +72,25 @@ class ClienteRepository {
   }
 
   Future<String> enviarFotoPerfil(File arquivo, int codigoCliente) async {
-    final StorageReference storageReference = FirebaseStorage().ref().child(
-        'clientes/$codigoCliente/${Timestamp.now().microsecondsSinceEpoch}');
-    final StorageUploadTask uploadTask = storageReference.putFile(arquivo);
+    try {
+      final StorageReference storageReference = FirebaseStorage().ref().child(
+          'clientes/$codigoCliente/${Timestamp.now().microsecondsSinceEpoch}');
+      final StorageUploadTask uploadTask = storageReference.putFile(arquivo);
 
-    final StreamSubscription<StorageTaskEvent> streamSubscription =
-        uploadTask.events.listen((event) {
-      // Mostra o status atual do envio
-      print('EVENT ${event.type}');
-    });
+      final StreamSubscription<StorageTaskEvent> streamSubscription =
+          uploadTask.events.listen((event) {
+        // Mostra o status atual do envio
+        print('EVENT ${event.type}');
+      });
 
-    var urlEnvio = await uploadTask.onComplete;
-    var urlFoto = await urlEnvio.ref.getDownloadURL();
-    streamSubscription.cancel();
+      var urlEnvio = await uploadTask.onComplete;
+      var urlFoto = await urlEnvio.ref.getDownloadURL();
+      streamSubscription.cancel();
 
-    return urlFoto;
+      return urlFoto;
+    } catch (e) {
+      print(e);
+      throw FirestoreException('Falha ao enviar foto');
+    }
   }
 }

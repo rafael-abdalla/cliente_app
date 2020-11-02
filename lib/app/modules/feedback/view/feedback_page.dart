@@ -15,6 +15,17 @@ class FeedbackPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: Icon(
+            FontAwesome.arrow_left,
+            color: Theme.of(context).primaryColor,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: ChangeNotifierProvider(
         create: (context) => FeedbackController(),
         child: FeedbackContent(),
@@ -53,89 +64,76 @@ class _FeedbackContentState extends State<FeedbackContent>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(
-            FontAwesome.arrow_left,
-            color: Theme.of(context).primaryColor,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: ScrollConfiguration(
-        behavior: new ScrollBehavior()
-          ..buildViewportChrome(context, null, AxisDirection.down),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: 5),
-                Text(
-                  'Feedback',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
+    return ScrollConfiguration(
+      behavior: new ScrollBehavior()
+        ..buildViewportChrome(context, null, AxisDirection.down),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 5),
+              Text(
+                'Feedback',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
                 ),
-                SizedBox(height: 10),
-                Text(
-                  'Ajude a melhorar o aplicativo enviando uma breve avaliação.',
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Ajude a melhorar o aplicativo enviando uma breve avaliação.',
+                style: TextStyle(
+                  fontSize: 16,
                 ),
-                SizedBox(height: 20),
-                Center(
-                  child: ValueListenableBuilder(
-                    valueListenable: avaliacao,
-                    builder: (_, avaliacaoValue, child) {
-                      return RatingBar(
-                        maxRating: 5,
-                        onRatingChanged: (rating) => avaliacao.value = rating,
-                        filledIcon: Icons.star,
-                        emptyIcon: Icons.star_border,
-                        halfFilledIcon: Icons.star_half,
-                        emptyColor: Theme.of(context).primaryColor,
-                        isHalfAllowed: true,
-                        filledColor: Theme.of(context).primaryColor,
-                        size: 36,
-                      );
-                    },
-                  ),
+              ),
+              SizedBox(height: 20),
+              Center(
+                child: ValueListenableBuilder(
+                  valueListenable: avaliacao,
+                  builder: (_, avaliacaoValue, child) {
+                    return RatingBar(
+                      maxRating: 5,
+                      onRatingChanged: (rating) => avaliacao.value = rating,
+                      filledIcon: Icons.star,
+                      emptyIcon: Icons.star_border,
+                      halfFilledIcon: Icons.star_half,
+                      emptyColor: Theme.of(context).primaryColor,
+                      isHalfAllowed: true,
+                      filledColor: Theme.of(context).primaryColor,
+                      size: 36,
+                    );
+                  },
                 ),
-                SizedBox(height: 20),
-                Form(
-                  key: _formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: ClienteInput(
-                    controller: _textoController,
-                    hintText: 'Descreva suas impressões',
-                    lines: 6,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty)
-                        return 'Texto obrigatório';
+              ),
+              SizedBox(height: 20),
+              Form(
+                key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: ClienteInput(
+                  controller: _textoController,
+                  hintText: 'Descreva suas impressões',
+                  lines: 6,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty)
+                      return 'Texto obrigatório';
 
-                      return null;
-                    },
-                  ),
+                    return null;
+                  },
                 ),
-                SizedBox(height: 20),
-                ClienteButton(
-                  'Enviar',
-                  width: MediaQuery.of(context).size.width,
-                  height: 45,
-                  buttonColor: Theme.of(context).primaryColor,
-                  textColor: Colors.white,
-                  textStyle: TextStyle(fontSize: 16),
-                  onPressed: () => _enviarFeedback(context),
-                )
-              ],
-            ),
+              ),
+              SizedBox(height: 20),
+              ClienteButton(
+                'Enviar',
+                width: MediaQuery.of(context).size.width,
+                height: 45,
+                buttonColor: Theme.of(context).primaryColor,
+                textColor: Colors.white,
+                textStyle: TextStyle(fontSize: 16),
+                onPressed: () => _enviarFeedback(context),
+              )
+            ],
           ),
         ),
       ),
