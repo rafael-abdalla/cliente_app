@@ -260,6 +260,7 @@ class _CadastroContentState extends State<CadastroContent>
           docId: widget.cliente.docId,
           codigo:
               widget.cliente.codigo ?? Timestamp.now().microsecondsSinceEpoch,
+          caminhoImagem: widget.cliente.caminhoImagem,
           nome: nomeController.text,
           email: emailController.text,
           telefone: int.parse(telefoneController.text),
